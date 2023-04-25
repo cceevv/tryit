@@ -32,7 +32,8 @@ npm i @cceevv/tryit
 import tryit from "@cceevv/tryit";
 
 function syncDemo() {
-  const [data, err] = tryit(() => {
+  const DefaultValue = {a: 0, b: ''}
+  const [data = DefaultValue, err] = tryit(() => {
     return JSON.parse('--------{"a":1234, "b":"bbb"}')
   })
   if (err) {
