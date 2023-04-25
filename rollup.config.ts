@@ -8,8 +8,8 @@ const pkg = JSON.parse(readFileSync('./package.json', 'utf8'));
 export default {
   input: `compiled/tryit.js`,
   output: [
-    { file: pkg.main, name: pkg.name, format: "umd", sourcemap: true, exports: 'named' },
-    { file: pkg.module, name: pkg.name, format: "es", sourcemap: true, exports: 'named' }
+    { file: pkg.main, name: 'tryit', format: "umd", sourcemap: true, exports: 'named' },
+    { file: pkg.module, name: 'tryit', format: "es", sourcemap: true, exports: 'named' }
   ],
   // Indicate here external modules you don't wanna include in your bundle (i.e.: 'lodash')
   external: [],
