@@ -49,6 +49,15 @@ describe('Await tryit test', () => {
     expect(data).toBeUndefined();
   });
 
+  it('should be followed into the function returned Promise', async () => {
+    const [data, err] = await tryit(() => {
+      return Promise.resolve(666);
+    });
+
+    expect(err).toBeNull();
+    expect(data).toEqual(666);
+  });
+
   it('should return nothing when wrong type argument input', async () => {
     // @ts-ignore
     const [data, err] = await tryit(1);

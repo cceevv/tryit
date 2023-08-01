@@ -56,6 +56,17 @@ async function asyncDemo() {
   }
   console.log('handle data...', data)
 }
+
+async function followedReturnedPromise() {
+  const [data, err] = await tryit(async () => {
+    return Promise.resolve(666)
+  });
+  if (err) {
+    console.log('xxxxxxxxxx', err)
+    return;
+  }
+  console.log('handle data...', data)
+}
 ```
 
 ## API
