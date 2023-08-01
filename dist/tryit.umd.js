@@ -12,7 +12,11 @@
         }
         else if (promiseOrFunction instanceof Function) {
             try {
-                return [promiseOrFunction(), null];
+                var result = promiseOrFunction();
+                if (result instanceof Promise) {
+                    return tryit(result);
+                }
+                return [result, null];
             }
             catch (err) {
                 return [undefined, err];
