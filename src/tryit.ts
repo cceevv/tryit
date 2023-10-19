@@ -12,7 +12,7 @@ export function tryit<T, U = Error>(promiseOrFunction: unknown): unknown {
     try {
       const result = promiseOrFunction()
       if (result instanceof Promise) {
-        return tryit(result)
+        return tryit<T, U>(result)
       }
       return [result, null]
     } catch (err: any) {
