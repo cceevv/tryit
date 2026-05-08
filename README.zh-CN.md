@@ -26,56 +26,69 @@ yarn add @cceevv/tryit
 npm i @cceevv/tryit
 ```
 
+## 开发
+
+```sh
+pnpm install
+pnpm build
+pnpm test
+```
+
 ## 使用
 
 ```ts
 import tryit from "@cceevv/tryit";
 
 function syncDemo() {
-  const DefaultValue = {a: 0, b: ''}
+  const DefaultValue = { a: 0, b: "" };
   const [data = DefaultValue, err] = tryit(() => {
-    return JSON.parse('--------{"a":1234, "b":"bbb"}')
-  })
+    return JSON.parse('--------{"a":1234, "b":"bbb"}');
+  });
   if (err) {
-    console.log('xxxxxxxxxx', err)
+    console.log("xxxxxxxxxx", err);
     return;
   }
-  console.log('handle data...', data)
+  console.log("handle data...", data);
 }
 
 async function asyncDemo() {
   const promise = new Promise((resolve, reject) => {
-    resolve('resolve data');
+    resolve("resolve data");
     // reject('reject error');
-  })
+  });
 
-  const [data, err] = await tryit(promise);
+  const [data, err] = await tryit(() => promise);
   if (err) {
-    console.log('xxxxxxxxxx', err)
+    console.log("xxxxxxxxxx", err);
     return;
   }
-  console.log('handle data...', data)
+  console.log("handle data...", data);
 }
 
 async function followedReturnedPromise() {
   const [data, err] = await tryit(async () => {
-    return Promise.resolve(666)
+    return Promise.resolve(666);
   });
   if (err) {
-    console.log('xxxxxxxxxx', err)
+    console.log("xxxxxxxxxx", err);
     return;
   }
-  console.log('handle data...', data)
+  console.log("handle data...", data);
 }
 ```
 
 ## 接口
 
 ```ts
-export declare function tryit<T, U = Error>(func: (() => T)): [T, U];
-export declare function tryit<T, U = Error>(func: (() => Promise<T>)): Promise<[T, U]>;
-export declare function tryit<T, U = Error>(promise: Promise<T>): Promise<[T, U]>;
+export type TryitResult<T, U = Error> = [T, null] | [undefined, U];
+
+export declare function tryit<T, U = Error>(func: () => T): TryitResult<T, U>;
+export declare function tryit<T, U = Error>(
+  func: () => PromiseLike<T>,
+): Promise<TryitResult<T, U>>;
 ```
+
+`tryit` 只接受函数。异步值也需要包装成 `() => promise`。传入无效参数时会抛出 `TypeError`。
 
 ## License
 

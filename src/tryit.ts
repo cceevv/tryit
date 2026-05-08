@@ -1,27 +1,41 @@
-export function tryit<T, U = Error>(func: (() => T)): [T, U];
-export function tryit<T, U = Error>(func: (() => Promise<T>)): Promise<[T, U]>;
-export function tryit<T, U = Error>(promise: Promise<T>): Promise<[T, U]>;
+export type TryitSuccess<T> = [T, null];
+export type TryitFailure<U = Error> = [undefined, U];
+export type TryitResult<T, U = Error> = TryitSuccess<T> | TryitFailure<U>;
 
-export function tryit<T, U = Error>(promiseOrFunction: unknown): unknown {
-  if (promiseOrFunction instanceof Promise) {
-    return promiseOrFunction
-      .then<[T, null]>(data => [data, null])
-      .catch<[undefined, U]>((err: any) => [undefined, err])
+export function tryit<T, U = Error>(func: () => T): TryitResult<T, U>;
+export function tryit<T, U = Error>(
+  func: () => PromiseLike<T>,
+): Promise<TryitResult<T, U>>;
+
+export function tryit<T, U = Error>(
+  func: () => T | PromiseLike<T>,
+): TryitResult<T, U> | Promise<TryitResult<T, U>> {
+  if (typeof func !== "function") {
+    throw new TypeError("tryit expects a function");
   }
-  else if (promiseOrFunction instanceof Function) {
-    try {
-      const result = promiseOrFunction()
-      if (result instanceof Promise) {
-        return tryit<T, U>(result)
-      }
-      return [result, null]
-    } catch (err: any) {
-      return [undefined, err]
-    }
-  }
-  else {
-    return [undefined, null]
+
+  try {
+    const result = func();
+    return isPromiseLike(result) ? toPromiseResult<T, U>(result) : [result, null];
+  } catch (err: unknown) {
+    return [undefined, err as U];
   }
 }
 
-export default tryit
+function isPromiseLike<T>(value: unknown): value is PromiseLike<T> {
+  if (typeof value !== "object" || value === null) {
+    return false;
+  }
+
+  return typeof (value as { then?: unknown }).then === "function";
+}
+
+async function toPromiseResult<T, U = Error>(
+  promise: PromiseLike<T>,
+): Promise<TryitResult<T, U>> {
+  return Promise.resolve(promise)
+    .then<TryitSuccess<T>>((data) => [data, null])
+    .catch<TryitFailure<U>>((err: unknown) => [undefined, err as U]);
+}
+
+export default tryit;

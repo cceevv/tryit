@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest'
 import tryit from '../src/tryit'
 
 describe('Await tryit test', () => {
@@ -5,7 +6,7 @@ describe('Await tryit test', () => {
     const testInput = 1234;
     const promise = Promise.resolve(testInput);
 
-    const [data, err] = await tryit<number>(promise);
+    const [data, err] = await tryit<number>(() => promise);
 
     expect(err).toBeNull();
     expect(data).toEqual(testInput);
@@ -14,7 +15,7 @@ describe('Await tryit test', () => {
   it('should return an error when promise is rejected', async () => {
     const promise = Promise.reject('Error');
 
-    const [data, err] = await tryit<number>(promise);
+    const [data, err] = await tryit<number>(() => promise);
 
     expect(err).toEqual('Error');
     expect(data).toBeUndefined();
@@ -25,7 +26,7 @@ describe('Await tryit test', () => {
     let user: { name: string };
     let err: any;
 
-    [user, err] = await tryit(Promise.resolve({ name: '123' }));
+    [user, err] = await tryit(() => Promise.resolve({ name: '123' }));
 
     expect(user.name).toEqual('123');
   });
@@ -38,6 +39,13 @@ describe('Await tryit test', () => {
     expect(err).toBeNull();
     expect(data.a).toEqual(1234);
     expect(data.b).toEqual("bbb");
+  });
+
+  it('should return primitive values without treating them as promise-like', () => {
+    const [data, err] = tryit(() => 1);
+
+    expect(err).toBeNull();
+    expect(data).toEqual(1);
   });
 
   it('should return an Error when catching an error', async () => {
@@ -58,11 +66,8 @@ describe('Await tryit test', () => {
     expect(data).toEqual(666);
   });
 
-  it('should return nothing when wrong type argument input', async () => {
+  it('should throw when input is not a function', () => {
     // @ts-ignore
-    const [data, err] = await tryit(1);
-
-    expect(err).toBeNull();
-    expect(data).toBeUndefined();
+    expect(() => tryit(1)).toThrowError(new TypeError('tryit expects a function'));
   });
 });
